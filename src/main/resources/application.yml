@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: linkly-api
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:linkly}
+    username: ${DB_USER:linkly}
+    password: ${DB_PASSWORD:linkly}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    locations: classpath:db/migration
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=5m
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+linkly:
+  base-url: ${LINKLY_BASE_URL:http://localhost:8080}
+  geoip:
+    database-path: ${GEOIP_DB_PATH:./data/GeoLite2-City.mmdb}
