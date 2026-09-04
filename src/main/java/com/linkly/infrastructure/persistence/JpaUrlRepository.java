@@ -2,6 +2,7 @@ package com.linkly.infrastructure.persistence;
 
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import com.linkly.domain.model.ShortUrl;
@@ -24,6 +25,7 @@ class JpaUrlRepository implements UrlRepository {
     }
 
     @Override
+    @Cacheable("shortUrls")
     public Optional<ShortUrl> findByShortCode(String shortCode) {
         return jpaRepository.findByShortCode(shortCode).map(this::toDomain);
     }
