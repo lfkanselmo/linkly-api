@@ -1,7 +1,7 @@
-CREATE SEQUENCE short_url_seq START WITH 100000;
+CREATE SEQUENCE short_code_seq START WITH 100000;
 
 CREATE TABLE short_urls (
-    id BIGINT PRIMARY KEY DEFAULT nextval('short_url_seq'),
+    id BIGSERIAL PRIMARY KEY,
     short_code VARCHAR(12) NOT NULL UNIQUE,
     original_url TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

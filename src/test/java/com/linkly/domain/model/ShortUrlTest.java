@@ -28,6 +28,12 @@ class ShortUrlTest {
     }
 
     @Test
+    void rejectsUrlsWithInvalidUriSyntax() {
+        assertThatThrownBy(() -> new ShortUrl(1, "aB3xQ", "https://example.com/hello world", Instant.now(), null))
+                .isInstanceOf(InvalidShortUrlException.class);
+    }
+
+    @Test
     void rejectsBlankShortCode() {
         assertThatThrownBy(() -> new ShortUrl(1, " ", "https://example.com", Instant.now(), null))
                 .isInstanceOf(InvalidShortUrlException.class);

@@ -18,7 +18,7 @@ class SequenceShortCodeGenerator implements ShortCodeGenerator {
 
     @Override
     public String generate() {
-        Long sequenceValue = jdbcTemplate.queryForObject("SELECT nextval('short_url_seq')", Long.class);
+        Long sequenceValue = jdbcTemplate.queryForObject("SELECT nextval('short_code_seq')", Long.class);
         return Base62Codec.encode(SequencePermutation.permute(sequenceValue));
     }
 }

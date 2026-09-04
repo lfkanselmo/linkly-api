@@ -1,6 +1,8 @@
 package com.linkly.application.service;
 
 import java.time.Instant;
+import java.util.Locale;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import com.linkly.domain.port.UrlRepository;
 
 @Service
 public class UrlCommandService {
+
+    private static final Set<String> RESERVED_CODES = Set.of("api", "actuator", "swagger-ui", "v3", "favicon.ico");
 
     private final UrlRepository urlRepository;
     private final ShortCodeGenerator shortCodeGenerator;
@@ -37,7 +41,7 @@ public class UrlCommandService {
     }
 
     private void rejectSelfReferentialUrl(String originalUrl) {
-        if (originalUrl.startsWith(baseUrl)) {
+        if (originalUrl.toLowerCase(Locale.ROOT).startsWith(baseUrl.toLowerCase(Locale.ROOT))) {
             throw new InvalidShortUrlException("originalUrl must not point back to Linkly: " + originalUrl);
         }
     }
@@ -45,6 +49,9 @@ public class UrlCommandService {
     private String resolveShortCode(String customCode) {
         if (customCode == null) {
             return shortCodeGenerator.generate();
+        }
+        if (RESERVED_CODES.contains(customCode.toLowerCase(Locale.ROOT))) {
+            throw new InvalidShortUrlException("customCode is reserved: " + customCode);
         }
         if (urlRepository.existsByShortCode(customCode)) {
             throw new ShortCodeConflictException(customCode);

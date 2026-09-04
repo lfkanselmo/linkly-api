@@ -1,6 +1,7 @@
 package com.linkly.infrastructure.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 import com.linkly.TestcontainersConfiguration;
+import com.linkly.domain.exception.ShortCodeConflictException;
 import com.linkly.domain.model.ShortUrl;
 import com.linkly.domain.port.UrlRepository;
 
@@ -32,6 +34,16 @@ class JpaUrlRepositoryTest {
         assertThat(saved.id()).isPositive();
         assertThat(urlRepository.findByShortCode(shortCode))
                 .contains(new ShortUrl(saved.id(), shortCode, "https://example.com/page", createdAt, null));
+    }
+
+    @Test
+    void savingADuplicateShortCodeThrowsConflict() {
+        String shortCode = uniqueCode();
+        urlRepository.save(new ShortUrl(0, shortCode, "https://example.com/first", Instant.now(), null));
+
+        assertThatThrownBy(() -> urlRepository.save(
+                        new ShortUrl(0, shortCode, "https://example.com/second", Instant.now(), null)))
+                .isInstanceOf(ShortCodeConflictException.class);
     }
 
     @Test

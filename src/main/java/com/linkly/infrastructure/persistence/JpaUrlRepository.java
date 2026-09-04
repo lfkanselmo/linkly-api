@@ -3,8 +3,10 @@ package com.linkly.infrastructure.persistence;
 import java.util.Optional;
 
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
+import com.linkly.domain.exception.ShortCodeConflictException;
 import com.linkly.domain.model.ShortUrl;
 import com.linkly.domain.port.UrlRepository;
 
@@ -21,7 +23,11 @@ class JpaUrlRepository implements UrlRepository {
     public ShortUrl save(ShortUrl shortUrl) {
         ShortUrlEntity entity = new ShortUrlEntity(
                 shortUrl.shortCode(), shortUrl.originalUrl(), shortUrl.createdAt(), shortUrl.expiresAt());
-        return toDomain(jpaRepository.save(entity));
+        try {
+            return toDomain(jpaRepository.save(entity));
+        } catch (DataIntegrityViolationException exception) {
+            throw new ShortCodeConflictException(shortUrl.shortCode());
+        }
     }
 
     @Override

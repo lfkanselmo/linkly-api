@@ -72,6 +72,18 @@ class ShortenControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void rejectsSelfReferentialUrlRegardlessOfCase() throws Exception {
+        mockMvc.perform(shortenRequest("{\"originalUrl\": \"HTTP://LOCALHOST:8080/x\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejectsReservedCustomCode() throws Exception {
+        mockMvc.perform(shortenRequest("{\"originalUrl\": \"https://example.com/reserved\", \"customCode\": \"actuator\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
     private MockHttpServletRequestBuilder shortenRequest(String body) {
         return post("/api/v1/urls").contentType(MediaType.APPLICATION_JSON).content(body);
     }
