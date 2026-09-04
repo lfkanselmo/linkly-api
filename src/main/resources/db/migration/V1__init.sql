@@ -12,7 +12,7 @@ CREATE TABLE click_events (
     id BIGSERIAL PRIMARY KEY,
     short_code VARCHAR(12) NOT NULL REFERENCES short_urls (short_code),
     occurred_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    ip_address INET NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
     user_agent TEXT,
     referer TEXT,
     browser VARCHAR(50),
