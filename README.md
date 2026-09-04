@@ -21,6 +21,10 @@ mvn spring-boot:run
 
 La API queda en `http://localhost:8080`.
 
+El compose publica Postgres en el puerto `5433` del host, no el `5432` de siempre — así no choca si
+ya tenés un Postgres nativo corriendo en esta máquina (me pasó armando el proyecto). El `.env` sí lo
+lee la app directo, vía `spring.config.import`.
+
 ## Tests
 
 ```bash
