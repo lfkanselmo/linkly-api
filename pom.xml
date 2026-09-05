@@ -32,6 +32,7 @@
 		<yauaa.version>8.2.0</yauaa.version>
 		<geoip2.version>5.2.0</geoip2.version>
 		<archunit.version>1.5.0</archunit.version>
+		<bucket4j.version>8.19.0</bucket4j.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -84,6 +85,11 @@
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>${bucket4j.version}</version>
 		</dependency>
 
 		<dependency>

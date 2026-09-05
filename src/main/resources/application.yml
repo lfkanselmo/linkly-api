@@ -36,3 +36,6 @@ linkly:
     database-path: ${GEOIP_DB_PATH:./data/GeoLite2-City.mmdb}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+  rate-limit:
+    capacity: ${RATE_LIMIT_CAPACITY:30}
+    refill-period-seconds: ${RATE_LIMIT_REFILL_SECONDS:60}
