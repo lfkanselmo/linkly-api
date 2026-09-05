@@ -1,6 +1,9 @@
 package com.linkly.application.service;
 
 import java.time.Instant;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.springframework.stereotype.Service;
 
@@ -34,16 +37,30 @@ public class StatsQueryService {
 
     public StatsResponse stats(String shortCode, Instant from, Instant to, StatsPeriod period) {
         findOrThrow(shortCode);
-        return new StatsResponse(
-                clickStatsRepository.countByShortCode(shortCode),
-                clickStatsRepository.countByPeriod(shortCode, from, to, period),
-                clickStatsRepository.topBrowsers(shortCode, TOP_N),
-                clickStatsRepository.topOperatingSystems(shortCode, TOP_N),
-                clickStatsRepository.topCountries(shortCode, TOP_N),
-                clickStatsRepository.topReferrers(shortCode, TOP_N));
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var totalClicks = executor.submit(() -> clickStatsRepository.countByShortCode(shortCode));
+            var series = executor.submit(() -> clickStatsRepository.countByPeriod(shortCode, from, to, period));
+            var topBrowsers = executor.submit(() -> clickStatsRepository.topBrowsers(shortCode, TOP_N));
+            var topOperatingSystems = executor.submit(() -> clickStatsRepository.topOperatingSystems(shortCode, TOP_N));
+            var topCountries = executor.submit(() -> clickStatsRepository.topCountries(shortCode, TOP_N));
+            var topReferrers = executor.submit(() -> clickStatsRepository.topReferrers(shortCode, TOP_N));
+            return new StatsResponse(
+                    get(totalClicks), get(series), get(topBrowsers), get(topOperatingSystems), get(topCountries), get(topReferrers));
+        }
     }
 
     private ShortUrl findOrThrow(String shortCode) {
         return urlRepository.findByShortCode(shortCode).orElseThrow(() -> new LinkNotFoundException(shortCode));
+    }
+
+    private static <T> T get(Future<T> future) {
+        try {
+            return future.get();
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(exception);
+        } catch (ExecutionException exception) {
+            throw new IllegalStateException(exception.getCause());
+        }
     }
 }

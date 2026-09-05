@@ -19,10 +19,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
 
+    private static final long MAX_TRACKED_ADDRESSES = 10_000;
+
     private final int capacity;
     private final Duration refillPeriod;
-    private final Cache<String, Bucket> buckets =
-            Caffeine.newBuilder().expireAfterAccess(Duration.ofMinutes(10)).build();
+    private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
+            .maximumSize(MAX_TRACKED_ADDRESSES)
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .build();
 
     RateLimitInterceptor(
             @Value("${linkly.rate-limit.capacity}") int capacity,
@@ -33,6 +37,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
         Bucket bucket = buckets.get(request.getRemoteAddr(), key -> newBucket());
         if (bucket.tryConsume(1)) {
             return true;

@@ -27,6 +27,21 @@ class RateLimitInterceptorTest {
     }
 
     @Test
+    void doesNotConsumeCapacityForCorsPreflightRequests() {
+        RateLimitInterceptor interceptor = new RateLimitInterceptor(1, 60);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        when(request.getRemoteAddr()).thenReturn("203.0.113.1");
+        when(request.getMethod()).thenReturn("OPTIONS");
+
+        assertThat(interceptor.preHandle(request, response, new Object())).isTrue();
+        assertThat(interceptor.preHandle(request, response, new Object())).isTrue();
+
+        when(request.getMethod()).thenReturn("POST");
+        assertThat(interceptor.preHandle(request, response, new Object())).isTrue();
+    }
+
+    @Test
     void tracksLimitsPerRemoteAddressIndependently() {
         RateLimitInterceptor interceptor = new RateLimitInterceptor(1, 60);
         HttpServletRequest requestA = mock(HttpServletRequest.class);
